@@ -51,6 +51,7 @@ class DataSeeder {
       String recurrence = 'None',
       int reminderOffset = 0,
       int duration = 30,
+      DateTime? createdAt, // <--- THÊM THAM SỐ NÀY
     }) async {
       await db.insert('tasks', {
         'title': title,
@@ -63,7 +64,9 @@ class DataSeeder {
         'duration': duration,
         // Nếu đã xong, lấy luôn dueDate làm ngày hoàn thành (để test thống kê quá khứ)
         'completedAt': (isCompleted == 1) ? dueDate.toIso8601String() : null,
-        'attachmentPath': null
+        'attachmentPath': null,
+        // <--- THÊM DÒNG NÀY: Nếu không truyền ngày tạo thì lấy ngày hiện tại
+        'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
       });
     }
 
@@ -104,6 +107,10 @@ class DataSeeder {
         int hour = 8 + random.nextInt(12); // Giờ làm việc từ 8h - 20h
 
         DateTime taskDate = DateTime(currentMonth.year, currentMonth.month, day, hour, 0);
+        
+        // <--- LOGIC MỚI: Tạo ngày createdAt giả lập
+        // Giả sử task được tạo trước deadline khoảng 1 đến 5 ngày cho nó thật
+        DateTime createdDate = taskDate.subtract(Duration(days: 1 + random.nextInt(4)));
 
         // Random nội dung công việc từ danh sách mẫu
         var sample = sampleTasks[random.nextInt(sampleTasks.length)];
@@ -118,6 +125,7 @@ class DataSeeder {
           groupId: sample['group'],
           isCompleted: isPast ? 1 : 0, // Quá khứ thì xong, Tương lai thì chưa
           duration: sample['duration'],
+          createdAt: createdDate, // <--- TRUYỀN NGÀY TẠO VÀO ĐÂY
         );
       }
     }
@@ -134,6 +142,7 @@ class DataSeeder {
       groupId: idCongViec,
       isCompleted: 0,
       duration: 15,
+      // Không cần truyền createdAt, nó sẽ tự lấy DateTime.now()
     );
 
     await insertTask(
@@ -142,6 +151,7 @@ class DataSeeder {
       groupId: idHocTap,
       isCompleted: 0,
       duration: 120,
+      // Không cần truyền createdAt, nó sẽ tự lấy DateTime.now()
     );
 
     print("--- ĐÃ TẠO XONG DỮ LIỆU ---");
