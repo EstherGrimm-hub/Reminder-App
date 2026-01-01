@@ -3,6 +3,7 @@ class Task {
   final String title;
   final String? note;
   final String? dueDate;
+  final String? createdAt;
   final int isCompleted; // 0: chưa xong, 1: đã xong
   final int? groupId;
   final String? attachmentPath;
@@ -16,6 +17,7 @@ class Task {
     required this.title,
     this.note,
     this.dueDate,
+    this.createdAt,
     this.isCompleted = 0,
     this.groupId,
     this.attachmentPath,
@@ -32,6 +34,7 @@ class Task {
       'title': title,
       'note': note,
       'dueDate': dueDate,
+      'createdAt': createdAt ?? DateTime.now().toIso8601String(),
       'isCompleted': isCompleted,
       'groupId': groupId,
       'attachmentPath': attachmentPath,
@@ -49,6 +52,7 @@ class Task {
       title: map['title'],
       note: map['note'],
       dueDate: map['dueDate'],
+      createdAt: map['createdAt'],
       isCompleted: map['isCompleted'],
       groupId: map['groupId'],
       attachmentPath: map['attachmentPath'],
