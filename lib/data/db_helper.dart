@@ -34,6 +34,7 @@ class DatabaseHelper {
         title TEXT NOT NULL,
         note TEXT,
         dueDate TEXT,
+        createdAt TEXT,
         isCompleted INTEGER NOT NULL,
         groupId INTEGER,
         attachmentPath TEXT,
@@ -49,6 +50,7 @@ class DatabaseHelper {
       CREATE TABLE task_groups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
+        createdAt TEXT,
         color INTEGER NOT NULL,
         iconCode INTEGER NOT NULL
       )
