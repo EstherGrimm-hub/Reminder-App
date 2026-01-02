@@ -23,8 +23,7 @@ class StatisticDetailScreen extends StatelessWidget {
     Map<String, List<Task>> groupedTasks = _groupTasks();
     List<String> keys = groupedTasks.keys.toList();
 
-    // Sắp xếp keys (Ngày/Tháng) giảm dần hoặc tăng dần
-    // Ở đây sắp xếp giảm dần (mới nhất lên đầu)
+    // Sắp xếp keys giảm dần (mới nhất lên đầu)
     keys.sort((a, b) => b.compareTo(a));
 
     int totalTasks = tasks.length;
@@ -136,6 +135,27 @@ class StatisticDetailScreen extends StatelessWidget {
   }
 
   Widget _buildTaskItem(Task task) {
+    // --- TÍNH TOÁN THỜI GIAN BẮT ĐẦU & KẾT THÚC ---
+    String timeRange = "";
+    if (task.completedAt != null) {
+      final endTime = DateTime.parse(task.completedAt!); // Giờ hoàn thành
+      DateTime startTime;
+
+      // LOGIC MỚI: Dùng createdAt làm giờ bắt đầu
+      if (task.createdAt != null) {
+        startTime = DateTime.parse(task.createdAt!);
+      } else {
+        // Fallback: Nếu dữ liệu cũ chưa có createdAt thì vẫn dùng duration để tính ngược lại
+        startTime = endTime.subtract(Duration(minutes: task.duration));
+      }
+
+      final startStr = DateFormat('HH:mm').format(startTime);
+      final endStr = DateFormat('HH:mm').format(endTime);
+
+      // Hiển thị dạng: 08:30 - 09:15
+      timeRange = "$startStr - $endStr";
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -153,15 +173,25 @@ class StatisticDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(task.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                // Nếu muốn hiện thêm thời lượng làm
                 if (task.duration > 0)
-                  Text("Thời gian: ${task.duration} phút", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  Text("Thời lượng: ${task.duration} phút", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               ],
             ),
           ),
-          if (task.completedAt != null)
-            Text(
-              DateFormat('HH:mm').format(DateTime.parse(task.completedAt!)),
-              style: TextStyle(color: Colors.grey[400], fontSize: 12),
+
+          // --- HIỂN THỊ KHUNG GIỜ ---
+          if (timeRange.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                timeRange, // Ví dụ: 08:30 - 09:00
+                style: TextStyle(color: Colors.grey[600], fontSize: 12, fontWeight: FontWeight.bold),
+              ),
             )
         ],
       ),
