@@ -108,13 +108,64 @@ class MonthDetailScreen extends StatelessWidget {
   }
 
   Widget _buildTaskRow(Task task) {
+    // --- 1. CHUẨN BỊ DỮ LIỆU ---
+    String timeRange = "";
+    String dateRange = "";
+    String durationText = "${task.duration} phút"; // Tổng thời gian làm
+
+    if (task.completedAt != null) {
+      final endTime = DateTime.parse(task.completedAt!);
+      DateTime startTime;
+
+      // Ưu tiên dùng createdAt làm giờ bắt đầu
+      if (task.createdAt != null) {
+        startTime = DateTime.parse(task.createdAt!);
+      } else {
+        // Fallback: Nếu dữ liệu cũ không có createdAt thì trừ duration
+        startTime = endTime.subtract(Duration(minutes: task.duration));
+      }
+
+      // Format giờ (HH:mm)
+      final startStr = DateFormat('HH:mm').format(startTime);
+      final endStr = DateFormat('HH:mm').format(endTime);
+      timeRange = "$startStr - $endStr";
+
+      // Format ngày (d/M/yyyy)
+      final endDateStr = DateFormat('d/M/yyyy').format(endTime);
+      if (task.createdAt != null) {
+        final startDateStr = DateFormat('d/M/yyyy').format(DateTime.parse(task.createdAt!));
+        dateRange = "$startDateStr - $endDateStr";
+      } else {
+        dateRange = endDateStr;
+      }
+    }
+
     return ListTile(
       dense: true,
       leading: const Icon(Icons.check_circle, size: 16, color: Colors.green),
       title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      trailing: Text(
-        DateFormat('dd/MM').format(DateTime.parse(task.completedAt!)),
-        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+
+      // --- SỬA: HIỂN THỊ TỔNG THỜI GIAN Ở SUBTITLE ---
+      subtitle: Text(
+        "Tổng thời gian: $durationText",
+        style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600),
+      ),
+
+      // --- SỬA: GOM NGÀY + KHUNG GIỜ SANG TRAILING ---
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Căn giữa theo chiều dọc
+        crossAxisAlignment: CrossAxisAlignment.end, // Căn phải
+        mainAxisSize: MainAxisSize.min, // Co gọn lại để không chiếm hết chỗ
+        children: [
+          Text(
+            dateRange,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.bold),
+          ),
+          Text(
+            timeRange,
+            style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+          ),
+        ],
       ),
     );
   }
